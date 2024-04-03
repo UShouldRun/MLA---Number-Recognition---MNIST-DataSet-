@@ -1,1 +1,1 @@
-# MLA---Number-Recognition---MNIST-DataSet-
+# MLA - Number Recognition - MNIST DataSet
