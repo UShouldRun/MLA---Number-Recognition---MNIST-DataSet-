@@ -34,10 +34,12 @@ void print_test(char* test, int condition, double delta_time) {
 	printf("\033[0m"); // Reset color
 }
 
-void test_matrix(double entries[], int len, int n, int m) {
+void test() {
 	clock_t start, end;
 
 	char* test1 = "create_matrix / null_matrix";
+	double entries[4] = {1,2,3,4};
+	int n = 2, m = 2;
 	start = clock();	
 	Matrix* matrix = create_matrix(n,m);
 	end = clock();
@@ -93,7 +95,7 @@ void test_matrix(double entries[], int len, int n, int m) {
 	end = clock();
 
 	char* test9 = "mult_matrix";
-	int start1, end1;
+	clock_t start1, end1;
 	start1 = clock();
 	Matrix* mat2 = mult_matrix(mat1,mat1);
 	end1 = clock();
@@ -123,7 +125,6 @@ void test_matrix(double entries[], int len, int n, int m) {
 
 int main() {
 	srand(time(NULL));
-	double entries[4] = {1,2,3,4};
-	test_matrix(entries,4,2,2);
+	test();
 	return 0;
 }
