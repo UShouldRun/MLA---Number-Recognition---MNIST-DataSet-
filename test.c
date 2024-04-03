@@ -80,14 +80,6 @@ void test() {
 	end = clock();
 	print_test(test6, 1, (double) (end - start) / CLOCKS_PER_SEC);
 
-	// char* test7 = "null_matrix";
-	// int c = rand()%10 + 1, d = rand()%10 + 1;
-	// Matrix* mat1 = null_matrix(c,d);
-	// Matrix* mat2 = create_matrix(c,d);
-	// print_test(test7, equal_matrix(mat1, mat2, EPSILON), -1);
-	// free_matrix(mat1);
-	// free_matrix(mat2);
-
 	char* test8 = "id_matrix";
 	int k = rand()%5 + 2;
 	start = clock();
