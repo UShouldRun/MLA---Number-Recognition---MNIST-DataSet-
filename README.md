@@ -13,4 +13,4 @@ $ git clone https://github.com/UShouldRun/mla-number-recognition
 ```
 
 # Credits
-All code is free to use, I just ask those who may share it with others to share this github account.
+All code is free to use, I just ask those who may share it with others to mention this github account.
