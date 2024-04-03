@@ -1,3 +1,5 @@
+// More functions and changes will be made in the future
+
 #include <stdio.h>
 #include <stdlib.h>
 
