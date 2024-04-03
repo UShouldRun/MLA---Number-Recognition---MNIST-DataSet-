@@ -6,7 +6,7 @@ For the training section of the MLA, I will be using the classic MNIST DataSet (
 # Download the folder
 To download this repository, make sure you have git installed and type on your command shell:
 ```shell
-$ git install https://github.com/UShouldRun/mla-number-recognition
+$ git clone https://github.com/UShouldRun/mla-number-recognition
 ```
 
 # Credits
