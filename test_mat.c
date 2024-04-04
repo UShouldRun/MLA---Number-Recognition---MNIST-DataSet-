@@ -99,14 +99,13 @@ void test() {
 		print_test(test8, equal_matrix(mat1, mat2, EPSILON), (double) (end - start) / CLOCKS_PER_SEC);
 		print_test(test9, equal_matrix(mat1, mat2, EPSILON),  (double) (end1 - start1) / CLOCKS_PER_SEC);
 	}
-	free_matrix(mat1);
-	free_matrix(mat2);
 
 	char* test10 = "is_id_matrix";
 	start = clock();
 	int test = is_id_matrix(mat1, EPSILON);
 	end = clock();
 	print_test(test10, test, (double) (end - start) / CLOCKS_PER_SEC);
+	free_matrix(mat1);
 
 	char* test11 = "is_null_matrix";
 	start = clock();

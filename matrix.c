@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EPSILON 10e-12
+#define EPSILON 10e-2
 
 void mem_err(void *ptr);
 void value_err(void *ptr);
@@ -117,7 +117,13 @@ Matrix* create_matrix(int rows, int cols) {
 	return matrix;
 }
 
-Matrix* null_matrix(int rows, int cols) { return create_matrix(rows,cols); }
+Matrix* null_matrix(int rows, int cols) { 
+	Matrix* matrix = create_matrix(rows, cols);
+	double entries[rows*cols];
+	for (int i = 0; i < rows*cols; i++) entries[i] = 0;
+	define_matrix(matrix, entries, rows*cols);
+	return matrix;
+}
 
 Matrix* id_matrix(int n) {
 	Matrix* id = create_matrix(n,n);

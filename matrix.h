@@ -19,7 +19,7 @@ void swap_cols(Matrix* matrix, int a, int b); // tested
 
 Matrix* create_matrix(int rows, int cols); // tested
 Matrix* null_matrix(int rows, int cols); // tested
-Matrix* id_matrix(int n); // tested - needs to be fixed; see is_id_matrix
+Matrix* id_matrix(int n); // tested
 Matrix* vector_to_matrix(double vector[], int len); // not tested
 Matrix* copy_matrix(Matrix* matrix); // tested
 Matrix* symmetric_matrix(Matrix* matrix); // not tested
@@ -31,8 +31,8 @@ Matrix* mult_matrix(Matrix* a, Matrix* b); // tested - needs more though
 
 int is_square_matrix(Matrix* matrix); // not tested
 int determinant_matrix(Matrix* matrix); // not tested
-int is_null_matrix(Matrix* matrix, double epsilon); // tested - needs fixed
-int is_id_matrix(Matrix* matrix, double epsilon); // tested - needs to be fixed
+int is_null_matrix(Matrix* matrix, double epsilon); // tested
+int is_id_matrix(Matrix* matrix, double epsilon); // tested
 int has_null_row(Matrix* matrix, double epsilon); // not tested
 int has_null_col(Matrix* matrix, double epsilon); // not tested
 int equal_matrix(Matrix* a, Matrix* b, double epsilon); // tested
