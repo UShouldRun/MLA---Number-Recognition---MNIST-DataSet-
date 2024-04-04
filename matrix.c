@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EPSILON 10e-2
+#define EPSILON 10e-9
 
 void mem_err(void *ptr);
 void value_err(void *ptr);
