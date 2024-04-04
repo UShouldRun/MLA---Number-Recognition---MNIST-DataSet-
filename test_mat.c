@@ -6,7 +6,7 @@
 int test_definition(Matrix* matrix, double entries[], int len) {
 	for (int i = 0; i < matrix->rows; i++)
 		for (int j = 0; j < matrix->cols; j++)
-			if (entries[i*matrix->rows + j] != matrix->data[i][j]) return 0;
+			if (entries[i*matrix->cols + j] != matrix->data[i][j]) return 0;
 	return 1;
 }
 
@@ -31,17 +31,45 @@ void print_test(char* test, int condition, double delta_time) {
 	if (delta_time == -1) { printf("\n"); return; }
 
 	printf("\033[0;33m"); // Set color to yellow
-	printf(" - CPU time: %.18lf\n", delta_time);	
+	printf(" - CPU time: %.7lf\n", delta_time);	
 
 	printf("\033[0m"); // Reset color
+}
+
+int is_prime(int n) {
+	for (int i = 2; i*i <= n; i++) if (!(n%i)) return 0;
+	return 1;
+}
+
+int get_factors(int n, int factors[]) {
+	int len = 1;
+	factors[0] = 1;
+	for (int i = 2; i*i < n; i++)
+		if (!(n%i)) {
+			factors[len] = i;
+			factors[len + 1] = n%i;
+			len += 2;
+		}
+	factors[len + 1] = n;
+	return len + 1;
 }
 
 void test() {
 	clock_t start, end;
 
 	char* test1 = "create_matrix / null_matrix";
-	double entries[4] = {1,2,3,4};
-	int n = 2, m = 2, len = 4;
+	int n = rand()%10 + 1, m, len;
+	
+	while (is_prime(n)) n = rand()%10 + 1;
+	int facts[n];
+	for (int i = 0; i < n; i++) facts[i] = 0;
+	len = get_factors(n, facts);
+	do m = facts[rand()%(len-1)]; while (!m);
+	len = n*m;
+
+	double entries[len];
+	for (int i = 0; i < len; i++) entries[i] = (double) (rand()%100);
+
 	start = clock();	
 	Matrix* matrix = create_matrix(n,m);
 	end = clock();
