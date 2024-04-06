@@ -70,19 +70,19 @@ int main() {
 
 int test_definition(Matrix* matrix, double entries[], size_t len) {
     if (matrix->rows * matrix->cols != len) {
-        value_err(NULL); // Check if the length matches
+        value_err(NULL); 
         return 0;
     }
     
     for (int i = 0; i < matrix->rows; i++) {
         for (int j = 0; j < matrix->cols; j++) {
             if (entries[i * matrix->cols + j] != matrix->data[i][j]) {
-                return 0; // Entry doesn't match
+                return 0; 
             }
         }
     }
     
-    return 1; // All entries match
+    return 1;
 }
 
 int test_swap(Matrix* matrix, Matrix* swapped, int a, int b, int swap) {
@@ -203,7 +203,7 @@ void test_symmetric_matrix() {
     end = clock();
 
     int is_not_null = symmetric != NULL;
-    print_test_result("symmetric_matrix", is_not_null, time_elapsed(start, end)); // Print test result
+    print_test_result("symmetric_matrix", is_not_null, time_elapsed(start, end)); 
 
     free_matrix(matrix);
     free_matrix(symmetric);
@@ -226,7 +226,7 @@ void test_transpose_matrix() {
     end = clock();
 
     int is_transposed = transposed->rows == cols && transposed->cols == rows;
-    print_test_result("transpose_matrix", is_transposed, time_elapsed(start, end)); // Print test result
+    print_test_result("transpose_matrix", is_transposed, time_elapsed(start, end));
 
     free_matrix(matrix);
     free_matrix(transposed);
@@ -276,7 +276,7 @@ void test_add_matrix() {
     end = clock();
 
     int is_not_null = sum != NULL;
-    print_test_result("add_matrix", is_not_null, time_elapsed(start, end)); // Print test result
+    print_test_result("add_matrix", is_not_null, time_elapsed(start, end));
 
     free_matrix(matrix1);
     free_matrix(matrix2);
@@ -306,7 +306,7 @@ void test_sub_matrix() {
     end = clock();
 
     int is_not_null = difference != NULL;
-    print_test_result("sub_matrix", is_not_null, time_elapsed(start, end)); // Print test result
+    print_test_result("sub_matrix", is_not_null, time_elapsed(start, end));
 
     free_matrix(matrix1);
     free_matrix(matrix2);
@@ -335,7 +335,7 @@ void test_mult_matrix() {
     end = clock();
 
     int is_not_null = product != NULL;
-    print_test_result("mult_matrix", is_not_null, time_elapsed(start, end)); // Print test result
+    print_test_result("mult_matrix", is_not_null, time_elapsed(start, end));
 
     free_matrix(matrix1);
     free_matrix(matrix2);
