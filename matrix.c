@@ -146,13 +146,13 @@ Matrix* null_matrix(size_t rows, size_t cols) {
 }
 
 Matrix* id_matrix(size_t n) {
-	Matrix* id = create_matrix(n,n);
+	Matrix* id = null_matrix(n,n);
 	for (int i = 0; i < n; i++) id->data[i][i] = 1.;
 	return id;
 }
 
 Matrix* vector_to_matrix(Vector* vector) {
-	Matrix* vector_mat = create_matrix(vector->len,1);
+	Matrix* vector_mat = null_matrix(vector->len,1);
 	define_matrix(vector_mat, vector->data, vector->len);
 	return vector_mat;
 }
@@ -185,30 +185,43 @@ Matrix* inverse_matrix(Matrix* matrix) {
 	if (!is_square_matrix(matrix)) return NULL;
 	if (!determinant_matrix(matrix)) return NULL;
 	if (is_id_matrix(matrix, EPSILON)) return id_matrix(matrix->rows);
+	if (matrix->rows == 1) {
+		Matrix* inverse = null_matrix(matrix->rows, matrix->cols);
+		inverse->data[0][0] = 1/matrix->data[0][0];
+		return inverse;
+	}
+	// print_matrix(matrix, 3);
 
 	Matrix* copy = copy_matrix(matrix);
 	Matrix* id = id_matrix(matrix->rows);
 
-	for (int j = 0; j < copy->cols; j++) {		
-		if (is_id_matrix(copy, EPSILON)) break;
-
+	for (int j = 0; j < copy->cols && !is_id_matrix(copy, EPSILON); j++) {
 		double a_jj = copy->data[j][j];
 
 		if (!a_jj) {
-			int row = j;
-			for (int i = j; i < copy->rows; i++)
-				if (!(copy->data[row][j]) || (!copy->data[i][j] && abs_d(copy->data[i][j] - 1) < abs_d(copy->data[row][j] - 1))) row = i;
-			a_jj = copy->data[row][j];
-			swap_rows(copy, row, j);
+			int i = j + 1;
+			for (; i < copy->rows && a_jj == 0; i++) a_jj = copy->data[i][j];
+			swap_rows(copy, i, j);
+			swap_rows(id, i, j);
 		}
 
-		if (a_jj != 1) for (int k = j; k < copy->cols; k++) copy->data[j][k] /= a_jj;	
-		
-		for (int i = 0; i < copy->rows; i++)
+		if (a_jj != 1)
+			for (int k = j; k < copy->cols; k++) {
+				copy->data[j][k] /= a_jj;
+				id->data[j][k] /= a_jj;
+			}
+
+		for (int i = 0; i < copy->rows; i++) {
+			double a_ij = copy->data[i][j];
 			for (int k = j; k < copy->cols; k++)
-				if (k != i)
-					copy->data[i][k] -= copy->data[j][k] * copy->data[i][j]; 
+				if (k != i) {
+					copy->data[i][k] -= copy->data[j][k] * a_ij; 
+					id->data[i][k] -= id->data[j][k] * a_ij;
+				}
+		}
 	}
+
+	free_matrix(copy);
 	return id;
 }
 
@@ -228,14 +241,11 @@ Matrix* mult_matrix(Matrix* a, Matrix* b) {
 	if (is_null_matrix(a, EPSILON) || is_null_matrix(b, EPSILON)) return null_matrix(a->rows,b->cols);
 	if (is_id_matrix(a, EPSILON)) return copy_matrix(b);
 	if (is_id_matrix(b, EPSILON)) return copy_matrix(a);
-	Matrix* c = create_matrix(a->rows,b->cols);
-	for (int i = 0; i < c->rows; i++) {
-		for (int j = 0; j < c->cols; j++) {
-			c->data[i][j] = 0;
-			for (int k = 0; j < a->cols; j++)
+	Matrix* c = null_matrix(a->rows,b->cols);
+	for (int i = 0; i < c->rows; i++)
+		for (int j = 0; j < c->cols; j++)
+			for (int k = 0; k < a->cols; k++)
 				c->data[i][j] += a->data[i][k] * b->data[k][j];
-		} 
-	}
 	return c;
 }
 
@@ -259,7 +269,7 @@ Vector* null_vector(size_t len) {
 
 Vector* matrix_to_vector(Matrix* matrix) {
     if (matrix->cols != 1) value_err(NULL);
-    Vector* vector = create_vector(matrix->rows);
+    Vector* vector = null_vector(matrix->rows);
     for (int i = 0; i < matrix->rows; i++) vector->data[i] = matrix->data[i][0];
     return vector;
 }
@@ -297,7 +307,7 @@ int determinant_matrix(Matrix* matrix) {
 				for (int p = 0; p < sub_mat->rows; p++)
 					if (q != j) sub_mat->data[p][q-offset] = mat->data[p+1][q];
 					else offset = 1;
-			int sign = j%2 == 0 ? 1 : -1;
+			int sign = j % 2 == 0 ? 1 : -1;
 			det += sign * mat->data[0][j] * apply_la_place(sub_mat);
 			free_matrix(sub_mat);
 		}
@@ -351,4 +361,3 @@ int equal_matrix(Matrix* a, Matrix* b, double epsilon) {
 }
 
 double abs_d(double number) { return number < 0 ? -number : number; } 
-
