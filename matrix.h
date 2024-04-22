@@ -42,7 +42,7 @@ Vector* matrix_to_vector(Matrix* matrix);
 Vector* matrix_vector_mul(Matrix* matrix, Vector* vector);
 
 int is_square_matrix(Matrix* matrix); // not tested
-int determinant_matrix(Matrix* matrix); // not tested
+double determinant_matrix(Matrix* matrix); // not tested
 int is_null_matrix(Matrix* matrix, double epsilon); // tested
 int is_id_matrix(Matrix* matrix, double epsilon); // tested
 int has_null_row(Matrix* matrix, double epsilon); // not tested
