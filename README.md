@@ -4,7 +4,7 @@ A simple algorithm to put in pratice all my knowlodge I have on these topics and
 For the training section of the MLA, I will be using the classic MNIST DataSet (more about it here: https://en.wikipedia.org/wiki/MNIST_database).
 
  - State: ongoing
- - Blog: a site will be made where I will state all my journey through out this project and I will link it here;
+ - Blog: [ushouldrun.github.io](https://ushouldrun.github.io);
 
 # Download the folder
 To download this repository, make sure you have git installed and type on your command shell:
