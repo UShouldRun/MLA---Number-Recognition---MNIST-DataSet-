@@ -39,7 +39,7 @@ void feedback(Matrix* edges[EDGES], Vector* biases[EDGES], int numbers[GUESS_STA
     return;
 }
 
-void write_data(Matrix* edges, Vector* biased[NODES], char file[]) { return; }
+void write_data(Matrix* edges, Vector* biased[EDGES], char file[]) { return; }
 
 int create_and_train_mla(char data_set[], char data_mla[]) {
     srand(time(NULL));
