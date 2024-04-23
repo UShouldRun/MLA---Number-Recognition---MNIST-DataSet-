@@ -17,7 +17,7 @@
 
 int read_data_set(Vector* pixels, char data_set[], long file) { return 0; }
 
-void guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[NODES]) {
+void guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
     Vector* raw_layer1 = matrix_vector_mul(edges[0], nodes[0]->state);
     for (long i = 0; i < raw_layer1->len; i++) nodes[1]->state->data[i] = sigmoid(raw_layer1->data[i] + biases[0]->data[i]);
 
@@ -52,7 +52,7 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
     Vector* bias1 = null_vector(NODE_LEVEL_1);
     Vector* bias2 = null_vector(NODE_LEVEL_2);
     Vector* output_bias = null_vector(NODE_LEVEL_3);
-    Vector* biases[NODES] = { &bias1, &bias2, &output_bias };
+    Vector* biases[EDGES] = { &bias1, &bias2, &output_bias };
 
     Node* picture_node = create_node(0, 0, pixels);
     Node* layer1_node = create_node(1, 0, layer1);
