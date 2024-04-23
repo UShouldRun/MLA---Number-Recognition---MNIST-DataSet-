@@ -35,7 +35,7 @@ double cost(Vector* expected[GUESS_STACK], Vector* guesses[GUESS_STACK]) {
     return sum/(2*n);
 }
 
-void feedback(Node* nodes[NODES], Matrix* edges[EDGES], int numbers[GUESS_STACK], Vector* guesses[GUESS_STACK]) {
+void feedback(Matrix* edges[EDGES], Vector* biases[EDGES], int numbers[GUESS_STACK], Vector* guesses[GUESS_STACK]) {
     return;
 }
 
@@ -96,7 +96,7 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
             guess(nodes, edges, biases);
             guesses[j] = copy_vector(nodes[3]->state);
         }
-        feedback(nodes, edges, numbers, guesses);
+        feedback(edges, numbers, guesses);
     }
 
     write_data(edges, biases, data_mla);
