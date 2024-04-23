@@ -41,18 +41,27 @@ Matrix* mult_matrix(Matrix* a, Matrix* b);
 
 Vector* create_vector(size_t len);
 Vector* null_vector(size_t len);
+Vector* copy_vector(Vector* vector);
 Vector* matrix_to_vector(Matrix* matrix);
 Vector* matrix_vector_mul(Matrix* matrix, Vector* vector);
+Vector* cross_product_3d(Vector* v, Vector* u);
 
 int is_square_matrix(Matrix* matrix);
-double determinant_matrix(Matrix* matrix);
 int is_null_matrix(Matrix* matrix, double epsilon);
 int is_id_matrix(Matrix* matrix, double epsilon);
 int has_null_row(Matrix* matrix, double epsilon);
 int has_null_col(Matrix* matrix, double epsilon);
 int equal_matrix(Matrix* a, Matrix* b, double epsilon);
 
+long factorial(long n);
+
+double pow_int(double x, long n);
+double exp(double x);
+double sigmoid(double x);
 double abs_d(double number);
+double determinant_matrix(Matrix* matrix);
+double dot_product_vector(Vector* v, Vector* u);
+double norm_vector(Vector* vector);
 
 void mem_err(void *ptr) {
      if (ptr == NULL) {
@@ -227,7 +236,7 @@ Matrix* inverse_matrix(Matrix* matrix) {
           for (int i = 0; i < copy->rows; i++) {
                double a_ij = copy->data[i][j];
                for (int k = 0; k < copy->cols && i != j; k++) {
-                    copy->data[i][k] -= copy->data[j][k] * a_ij; 
+                    copy->data[i][k] -= copy->data[j][k] * a_ij;
                     id->data[i][k] -= id->data[j][k] * a_ij;
                }
           }
@@ -279,6 +288,12 @@ Vector* null_vector(size_t len) {
      return vector;
 }
 
+Vector* copy_vector(Vector* vector) {
+    Vector* copy = create_vector(vector->len);
+    for (int i = 0; i < vector->len; i++) copy->data[i] = vector->data[i];
+    return copy;
+}
+
 Vector* matrix_to_vector(Matrix* matrix) {
     if (matrix->cols != 1) value_err(NULL);
     Vector* vector = null_vector(matrix->rows);
@@ -294,6 +309,26 @@ Vector* matrix_vector_mul(Matrix* matrix, Vector* vector) {
     free_matrix(vec_mat);
     free_matrix(result);
     return result_vector;
+}
+
+Vector* cross_product_3d(Vector* v, Vector* u) {
+    assert(v->len != 3);
+    Vector* w = create_vector(v->len);
+
+    for (int j = 0; j < 3; j++) {
+        Matrix* sub_matrix = create_matrix(2,2);
+        for (int i = 1; i < 3; i++) {
+            for (int k = 0; k < 3; k++)
+                if (j != k) {
+                    if (i == 2) sub_matrix->data[i][k - (k > j ? 1 : 0)] = v->data[k];
+                    else sub_matrix->data[i][k - (k > j ? 1 : 0)] = u->data[k];
+                }
+        }
+        w->data[i] = (j % 2 ? -1 : 1) * determinant_matrix(sub_matrix);
+        free_matrix(sub_matrix);
+    }
+
+    return w;
 }
 
 int is_square_matrix(Matrix* matrix) { return matrix->rows == matrix->cols; }
@@ -369,4 +404,56 @@ int equal_matrix(Matrix* a, Matrix* b, double epsilon) {
      return 1;
 }
 
+long factorial(long n) {
+    long fact = 1;
+    for (long i = 1; i < n; i++) fact *= i;
+    return fact;
+}
+
+double pow_int(double x, long n) {
+    if (x == 1) return 1;
+    if (x == 0) return 0;
+    if (x == -1) return n % 2 ? -1 : 1;
+    double result = 1;
+    double r = n < 0 ? 1/x : x;
+    n = n < 0 ? -n : n;
+    for (long i = 0; i < n; i++) result *= r;
+    return 
+}
+
+double exp(double x) {
+    long n = 0;
+    double sum = 0, prev;
+    do {
+    prev = sum;
+    sum += pow_int(x, n) / factorial(n);
+    n++;
+    } while(abs_d(sum - prev) > EPSILON)
+    return sum;
+}
+
+double sigmoid(double x) { return 1/(1 + exp(-x)); }
+
 double abs_d(double number) { return number < 0 ? -number : number; } 
+
+double sqrt_d(double number) {
+    double x0 = number/2;
+    double newtons_method(double x_n, int iteration) {
+        if (iteration == 50) return prev;
+        return newtons_method(x_n/2 - x0/(2 * x_n), ++iteration);
+    }
+    return newtons_method(x0, 0);
+}
+
+double dot_product_vector(Vector* v, Vector* u) {
+    assert(v->len != u->len);
+    double dot_product = 0;
+    for (int i = 0; i < v->len; i++) dot_product += v->data[i] * u->data[i];
+    return dot_product;
+}
+
+double norm_vector(Vector* vector) {
+    double sq_norm = 0;
+    for (int i = 0; i < vector->len; i++) sq_norm += vector->data[i] * vector->data[i];
+    return sqrt_d(sq_norm);
+}
