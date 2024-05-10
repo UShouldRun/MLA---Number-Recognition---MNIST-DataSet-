@@ -2,16 +2,13 @@
 #include "math/nla.h"
 #include <time.h>
 
-<<<<<<< HEAD
 #define EXIT_SUCCESS 0
 #define MALLOC_FAIL 1
 
 #define SAMPLES 70000
 #define TEST_SAMPLES SAMPLES * 1/7
 #define TRAINING_SAMPLES SAMPLES * 6/7
-=======
-#define TRAINING_SAMPLES 60000
->>>>>>> origin/main
+
 #define GUESS_STACK 10
 #define LEARNING_FACTOR 1
 
@@ -25,7 +22,7 @@
 
 #define MAX_ENTRY 100
 
-<<<<<<< HEAD
+
 typedef struct {
     short unsigned flag;
     long layer;
@@ -78,11 +75,6 @@ int read_data_set(Vector* pixels, char data_set[], long file) {
 }
 
 void network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
-=======
-int read_data_set(Vector* pixels, char data_set[], long file) { return 0; }
-
-void guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
->>>>>>> origin/main
     Vector* raw_layer1 = matrix_vector_mul(edges[0], nodes[0]->state);
     for (long i = 0; i < raw_layer1->len; i++) nodes[1]->state->data[i] = sigmoid(raw_layer1->data[i] + biases[0]->data[i]);
 
@@ -93,7 +85,6 @@ void guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
     for (long i = 0; i < raw_output->len; i++) nodes[3]->state->data[i] = sigmoid(raw_output->data[i] + biases[2]->data[i]);
 }
 
-<<<<<<< HEAD
 double cost(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], long entry) {
     double sum = 0;
     for (long n; n < GUESS_STACK; n++)
@@ -156,30 +147,6 @@ void gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK],
 }
 
 void write_data(Matrix* edges[EDGES], Vector* biased[EDGES], char file[]) { return; }
-=======
-double cost(Vector* expected[GUESS_STACK], Vector* guesses[GUESS_STACK], long entry) {
-    double sum = 0;
-    long n = 0;
-    for (; n < GUESS_STACK; n++) sum += pow_int(expected[n]->data[entry] - guesses[n]->data[entry], 2)
-    return sum/(2*n);
-}
-
-double sigmoid_partial_bias(double expected_entry, double guess_entry) {
-    return pow_int(sigmoid(guess_entry), 2) * exp(-guess_entry);
-}
-double sigmoid_partial_weight(double expected_entry, double guess_entry, double prev) {
-    return sigmoid_partial_bias * prev;
-}
-
-double cost_particial_bias(Node* prev_node, Vector* expected, Vector* guess) {}
-double cost_particial_weight(Node* prev_node, Vector* expected, Vector* guess) {}
-
-void feedback(Matrix* edges[EDGES], Vector* biases[EDGES], Node* nodes[NODES], int numbers[GUESS_STACK], Vector* guesses[GUESS_STACK]) {
-    return;
-}
-
-void write_data(Matrix* edges, Vector* biased[EDGES], char file[]) { return; }
->>>>>>> origin/main
 
 int create_and_train_mla(char data_set[], char data_mla[]) {
     srand(time(NULL));
@@ -192,21 +159,13 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
     Vector* bias1 = null_vector(NODE_LEVEL_1);
     Vector* bias2 = null_vector(NODE_LEVEL_2);
     Vector* output_bias = null_vector(NODE_LEVEL_3);
-<<<<<<< HEAD
     Vector* biases[EDGES] = { bias1, bias2, output_bias };
-=======
-    Vector* biases[EDGES] = { &bias1, &bias2, &output_bias };
->>>>>>> origin/main
 
     Node* picture_node = create_node(0, 0, pixels);
     Node* layer1_node = create_node(1, 0, layer1);
     Node* layer2_node = create_node(2, 0, layer2);
     Node* output_node = create_node(3, 0, layer3);
-<<<<<<< HEAD
     Node* nodes[NODES] = { picture_node, layer1_node, layer2_node, output_node };
-=======
-    Node* nodes[NODES] = { &picture_node, &layer1_node, &layer2_node, &output_node };
->>>>>>> origin/main
 
     picture_node->children[0] = 1;
     layer1_node->parents[0] = 0;
@@ -230,25 +189,17 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
     for (long i = 0; i < NODE_LEVEL_3 * NODE_LEVEL_2; i++) random_entries3[i] = rand() % MAX_ENTRY;
     define_matrix(edge3, random_entries3, NODE_LEVEL_3 * NODE_LEVEL_2);
 
-<<<<<<< HEAD
     Matrix* edges[EDGES] = { edge1, edge2, edge3 };
 
     int numbers[GUESS_STACK];
     Vector* guess[GUESS_STACK];
     Node* stored_network[GUESS_STACK][NODES];
-=======
-    Matrix* edges = { &edge1, &edge2, &edge3 };
-
-    int numbers[GUESS_STACK];
-    Vector* guesses[GUESS_STACK];
->>>>>>> origin/main
 
     for (long i = 0; i < TRAINING_SAMPLES / GUESS_STACK; i++) {
         for (long j = 0; j < GUESS_STACK; j++) {
             nodes[1]->state = null_vector(NODE_LEVEL_1);
             nodes[2]->state = null_vector(NODE_LEVEL_2);
             nodes[3]->state = null_vector(NODE_LEVEL_3);
-<<<<<<< HEAD
 
             numbers[j] = read_data_set(picture_node->state, data_set, i * GUESS_STACK + j);
             network_guess(nodes, edges, biases);
@@ -263,23 +214,11 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
                 expected[i]->data[j] = j == numbers[j] - 1;
         }
         gradient_descent(expected, guess, edges, biases, stored_network);
-=======
-            numbers[j] = read_data_set(picture_node->state, data_set, i * GUESS_STACK + j);
-            guess(nodes, edges, biases);
-            guesses[j] = copy_vector(nodes[3]->state);
-        }
-        feedback(nodes, edges, numbers, guesses);
->>>>>>> origin/main
     }
 
     write_data(edges, biases, data_mla);
 
-<<<<<<< HEAD
     return EXIT_SUCCESS;
 }
 
-int main() { return 0; }
-=======
-    return 0;
-}
->>>>>>> origin/main
+int main() { return EXIT_SUCCESS; }

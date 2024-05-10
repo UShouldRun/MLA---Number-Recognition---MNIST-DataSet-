@@ -1,19 +1,12 @@
-<<<<<<< HEAD
 #ifndef NLA_H
 #define NLA_H
 
-=======
->>>>>>> origin/main
 #include <stdio.h>
 #include <stdlib.h>
 
 #define EPSILON 10e-9
 
-<<<<<<< HEAD
 void mem_err(void *ptr, int line);
-=======
-void mem_err(void *ptr);
->>>>>>> origin/main
 void value_err(void *ptr);
 
 typedef struct {
@@ -69,8 +62,5 @@ double abs_d(double number);
 double determinant_matrix(Matrix* matrix);
 double dot_product_vector(Vector* v, Vector* u);
 double norm_vector(Vector* vector);
-<<<<<<< HEAD
 
 #endif
-=======
->>>>>>> origin/main

@@ -1,19 +1,11 @@
-<<<<<<< HEAD
 #include <stdlib.h>
-=======
-#include <stlib.h>
->>>>>>> origin/main
 #include <assert.h>
 #include "nla.h"
 
 #define MAX_PARENTS 100
 #define MAX_CHILDREN 100
 
-<<<<<<< HEAD
 typedef struct {
-=======
-type struct {
->>>>>>> origin/main
     long id;
     long parents[MAX_PARENTS];
     long children[MAX_CHILDREN];

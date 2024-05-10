@@ -6,11 +6,7 @@
 
 #define EPSILON 10e-9
 
-<<<<<<< HEAD
 void mem_err(void *ptr, int line);
-=======
-void mem_err(void *ptr);
->>>>>>> origin/main
 void value_err(void *ptr);
 
 typedef struct {
@@ -67,15 +63,9 @@ double determinant_matrix(Matrix* matrix);
 double dot_product_vector(Vector* v, Vector* u);
 double norm_vector(Vector* vector);
 
-<<<<<<< HEAD
 void mem_err(void *ptr, int line) {
      if (ptr == NULL) {
           printf("Memory allocation failed: line %d;", line);
-=======
-void mem_err(void *ptr) {
-     if (ptr == NULL) {
-          printf("Memory allocation failed\n");
->>>>>>> origin/main
           exit(EXIT_FAILURE);
      }
 }
@@ -139,29 +129,17 @@ void swap_cols(Matrix* matrix, int a, int b) {
 
 Matrix* create_matrix(size_t rows, size_t cols) { 
      Matrix* matrix = (Matrix*)malloc(sizeof(Matrix));
-<<<<<<< HEAD
      mem_err(matrix, 131);
-=======
-     mem_err(matrix);
->>>>>>> origin/main
 
      matrix->rows = rows;
      matrix->cols = cols;
 
      matrix->data = (double**)malloc(rows * sizeof(double*));
-<<<<<<< HEAD
      mem_err(matrix->data, 137);
 
      for (int i = 0; i < rows; i++) {
           matrix->data[i] = (double*)malloc(cols * sizeof(double));
           mem_err(matrix->data[i], 141);
-=======
-     mem_err(matrix->data);
-
-     for (int i = 0; i < rows; i++) {
-          matrix->data[i] = (double*)malloc(cols * sizeof(double));
-          mem_err(matrix->data[i]);
->>>>>>> origin/main
      }
 
      return matrix;
@@ -295,19 +273,11 @@ Matrix* mult_matrix(Matrix* a, Matrix* b) {
 Vector* create_vector(size_t len) {
      if (!len) value_err(NULL);
      Vector* vector = (Vector*)malloc(sizeof(Vector));
-<<<<<<< HEAD
      mem_err(vector, 275);
 
      vector->len = len;
      vector->data = (double*)malloc(vector->len * sizeof(double));
      mem_err(vector->data, 279);
-=======
-     mem_err(vector);
-
-     vector->len = len;
-     vector->data = (double*)malloc(vector->len * sizeof(double));
-     mem_err(vector->data);
->>>>>>> origin/main
 
      return vector;
 }
@@ -354,11 +324,7 @@ Vector* cross_product_3d(Vector* v, Vector* u) {
                     else sub_matrix->data[i][k - (k > j ? 1 : 0)] = u->data[k];
                 }
         }
-<<<<<<< HEAD
         w->data[j] = (j % 2 ? -1 : 1) * determinant_matrix(sub_matrix);
-=======
-        w->data[i] = (j % 2 ? -1 : 1) * determinant_matrix(sub_matrix);
->>>>>>> origin/main
         free_matrix(sub_matrix);
     }
 
@@ -452,11 +418,7 @@ double pow_int(double x, long n) {
     double r = n < 0 ? 1/x : x;
     n = n < 0 ? -n : n;
     for (long i = 0; i < n; i++) result *= r;
-<<<<<<< HEAD
     return result;
-=======
-    return 
->>>>>>> origin/main
 }
 
 double exp(double x) {
@@ -466,11 +428,7 @@ double exp(double x) {
     prev = sum;
     sum += pow_int(x, n) / factorial(n);
     n++;
-<<<<<<< HEAD
     } while(abs_d(sum - prev) > EPSILON);
-=======
-    } while(abs_d(sum - prev) > EPSILON)
->>>>>>> origin/main
     return sum;
 }
 
@@ -481,11 +439,7 @@ double abs_d(double number) { return number < 0 ? -number : number; }
 double sqrt_d(double number) {
     double x0 = number/2;
     double newtons_method(double x_n, int iteration) {
-<<<<<<< HEAD
         if (iteration == 50) return x_n;
-=======
-        if (iteration == 50) return prev;
->>>>>>> origin/main
         return newtons_method(x_n/2 - x0/(2 * x_n), ++iteration);
     }
     return newtons_method(x0, 0);
