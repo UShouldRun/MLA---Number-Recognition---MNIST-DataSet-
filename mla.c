@@ -1,6 +1,7 @@
 #include "math/node.h"
 #include "math/nla.h"
 #include <time.h>
+#include <errno.h>
 
 #define EXIT_SUCCESS 0
 #define MALLOC_FAIL 1
@@ -22,7 +23,6 @@
 
 #define MAX_ENTRY 100
 
-
 typedef struct {
     short unsigned flag;
     long layer;
@@ -30,13 +30,18 @@ typedef struct {
     long j;
 } ID;
 
-int read_data_set(Vector* pixels, char data_set[], long file) { 
+void read_data_set(char data_set[], Vector* pixels[TRAINING_SAMPLES]) { 
     FILE *fp;
     unsigned char *buf;
     int magic_number, num_items, num_rows, num_cols;
 
     // Open the file
-    fp = fopen("train-images-idx3-ubyte", "rb");
+    fp = fopen(data_set, "rb");
+
+    if (fp == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
 
     // Read the magic number
     fread(&magic_number, sizeof(magic_number), 1, fp);
@@ -46,32 +51,108 @@ int read_data_set(Vector* pixels, char data_set[], long file) {
     fread(&num_items, sizeof(num_items), 1, fp);
     num_items = __builtin_bswap32(num_items);
 
-    // Read the number of rows
-    fread(&num_rows, sizeof(num_rows), 1, fp);
-    num_rows = __builtin_bswap32(num_rows);
-
-    // Read the number of columns
-    fread(&num_cols, sizeof(num_cols), 1, fp);
-    num_cols = __builtin_bswap32(num_cols);
-
     printf("Magic number: %d\n", magic_number);
     printf("Number of items: %d\n", num_items);
-    printf("Number of rows: %d\n", num_rows);
-    printf("Number of columns: %d\n", num_cols);
 
-    // Allocate memory to store image data
-    buf = (unsigned char *)malloc(num_rows * num_cols * sizeof(unsigned char));
+    // Iterate over each instance
+    for (int i = 0; i < num_items; i++) {
+        // Read the number of rows
+        fread(&num_rows, sizeof(num_rows), 1, fp);
+        num_rows = __builtin_bswap32(num_rows);
 
-    // Read image data
-    fread(buf, sizeof(unsigned char), num_rows * num_cols, fp);
+        // Read the number of columns
+        fread(&num_cols, sizeof(num_cols), 1, fp);
+        num_cols = __builtin_bswap32(num_cols);
+
+        printf("Instance %d:\n", i + 1);
+        printf("Number of rows: %d\n", num_rows);
+        printf("Number of columns: %d\n", num_cols);
+
+        // Allocate memory to store image data for this instance
+        buf = (unsigned char *)malloc(num_rows * num_cols * sizeof(unsigned char));
+
+        // Read image data for this instance
+        fread(buf, sizeof(unsigned char), num_rows * num_cols, fp);
+
+        Vector* pixels_instance = create_vector(num_rows * num_cols);
+        for (int j = 0; j < num_rows * num_cols; j++) {
+            pixels_instance->data[j] = buf[j];
+        }
+        pixels[i] = pixels_instance;
+
+        // Free allocated memory for this instance
+        free(buf);
+    }
 
     // Close the file
     fclose(fp);
+}
 
-    // Free allocated memory
-    free(buf);
+void write_data(Matrix* edges[EDGES], Vector* biases[EDGES], char file[]) {
+    FILE *fp = fopen(file, "w");
+    if (fp == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
 
-    return 0;
+    // Write matrix data to file
+    for (int i = 0; i < EDGES; i++) {
+        for (int row = 0; row < edges[i]->rows; row++) {
+            for (int col = 0; col < edges[i]->cols; col++) {
+                fprintf(fp, "%lf,", edges[i]->data[row][col]);
+            }
+            fprintf(fp, "\n");
+        }
+        fprintf(fp, "\n"); // Separate matrices with a blank line
+    }
+
+    // Write vector biases to file
+    for (int i = 0; i < EDGES; i++) {
+        for (int j = 0; j < biases[i]->len; j++) {
+            fprintf(fp, "%lf,", biases[i]->data[j]);
+        }
+        fprintf(fp, "\n");
+    }
+
+    fclose(fp);
+}
+
+void read_data(Matrix* edges[EDGES], Vector* biases[EDGES], char file[]) {
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read matrix data from file
+    for (int i = 0; i < EDGES; i++) {
+        for (int row = 0; row < edges[i]->rows; row++) {
+            for (int col = 0; col < edges[i]->cols; col++) {
+                if (fscanf(fp, "%lf,", &edges[i]->data[row][col]) != 1) {
+                    fprintf(stderr, "Error reading matrix data from file\n");
+                    exit(EXIT_FAILURE);
+                }
+            }
+        }
+        // Read blank line separator
+        char blankLine[100];
+        fgets(blankLine, sizeof(blankLine), fp);
+    }
+
+    // Read vector biases from file
+    for (int i = 0; i < EDGES; i++) {
+        for (int j = 0; j < biases[i]->len; j++) {
+            if (fscanf(fp, "%lf,", &biases[i]->data[j]) != 1) {
+                fprintf(stderr, "Error reading vector data from file\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+        // Read newline character separator
+        char newLine;
+        fscanf(fp, "%c", &newLine);
+    }
+
+    fclose(fp);
 }
 
 void network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
@@ -85,7 +166,7 @@ void network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGE
     for (long i = 0; i < raw_output->len; i++) nodes[3]->state->data[i] = sigmoid(raw_output->data[i] + biases[2]->data[i]);
 }
 
-double cost(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], long entry) {
+double cost(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK]) {
     double sum = 0;
     for (long n; n < GUESS_STACK; n++)
         for (int i = 0; i < NODE_LEVEL_3; i++)
@@ -146,9 +227,25 @@ void gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK],
     free(id);
 }
 
-void write_data(Matrix* edges[EDGES], Vector* biased[EDGES], char file[]) { return; }
+void update_progress_bar(int progress) {
+    const int bar_width = 50;
+    float completion_percentage = ((float) (progress + 1) / TRAINING_SAMPLES) * 100;
+    int completed_width = (completion_percentage * bar_width) / 100;
 
-int create_and_train_mla(char data_set[], char data_mla[]) {
+    printf("\033[38;5;208m");
+    printf("\r[");
+    for (int i = 0; i < completed_width; i++) {
+        printf("=");
+    }
+    for (int i = completed_width; i < bar_width; i++) {
+        printf(" ");
+    }
+    printf("] %.1f%% ", completion_percentage);
+    fflush(stdout); // Flush the output to ensure it's displayed immediately
+    printf("\033[0m");
+}
+
+void create_and_train_mla(char data_mla[], Vector* input_pixels[TRAINING_SAMPLES], Vector* labels[TRAINING_SAMPLES]) {
     srand(time(NULL));
 
     Vector* pixels = null_vector(PIXELS);
@@ -197,28 +294,29 @@ int create_and_train_mla(char data_set[], char data_mla[]) {
 
     for (long i = 0; i < TRAINING_SAMPLES / GUESS_STACK; i++) {
         for (long j = 0; j < GUESS_STACK; j++) {
+            nodes[0]->state = input_pixels[i * TRAINING_SAMPLES + j];
             nodes[1]->state = null_vector(NODE_LEVEL_1);
             nodes[2]->state = null_vector(NODE_LEVEL_2);
             nodes[3]->state = null_vector(NODE_LEVEL_3);
 
-            numbers[j] = read_data_set(picture_node->state, data_set, i * GUESS_STACK + j);
             network_guess(nodes, edges, biases);
             guess[j] = copy_vector(nodes[3]->state);
 
             for (int k = 0; k < NODES; k++) stored_network[j][k] = nodes[k];
         }
         Vector* expected[GUESS_STACK];
-        for (int i = 0; i < GUESS_STACK; i++) {
-            expected[i] = null_vector(NODE_LEVEL_3);
-            for (int j = 0; j < NODE_LEVEL_3; j++)
-                expected[i]->data[j] = j == numbers[j] - 1;
-        }
+        for (int k = 0; k < GUESS_STACK; k++) expected[k] = copy_vector(labels[i * GUESS_STACK + k]);
+
+        printf("\r[");
+        printf("Training Section: Stack %ld - Cost %lf\n", i, cost(expected, guess));
+        fflush(stdout);
+        update_progress_bar(i * GUESS_STACK);
+
         gradient_descent(expected, guess, edges, biases, stored_network);
     }
 
     write_data(edges, biases, data_mla);
 
-    return EXIT_SUCCESS;
+    for (int i = 0; i < NODES; i++) free_node(nodes[i]);
+    for (int i = 0; i < EDGES; i++) { free_matrix(edges[i]); free_vector(biases[i]); }
 }
-
-int main() { return EXIT_SUCCESS; }
