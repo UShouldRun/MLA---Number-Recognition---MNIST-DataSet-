@@ -22,6 +22,7 @@ void create_and_train_mla(const char* data_mla, Vector* input_pixels[TRAINING_SA
     srand(time(NULL));
 
     Vector* pixels = null_vector(PIXELS);
+    // if (pixels == NULL) 
     Vector* layer1 = null_vector(NODE_LEVEL_1);
     Vector* layer2 = null_vector(NODE_LEVEL_2);
     Vector* layer3 = null_vector(NODE_LEVEL_3);

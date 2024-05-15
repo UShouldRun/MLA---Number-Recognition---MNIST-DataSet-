@@ -68,17 +68,17 @@ void swap_cols(Matrix* matrix, int a, int b) {
 
 Matrix* create_matrix(size_t rows, size_t cols) { 
      Matrix* matrix = (Matrix*)malloc(sizeof(Matrix));
-     mem_err(matrix, 131);
+     if (matrix == NULL) return NULL;
 
      matrix->rows = rows;
      matrix->cols = cols;
 
      matrix->data = (double**)malloc(rows * sizeof(double*));
-     mem_err(matrix->data, 137);
+     if (matrix->data == NULL) return NULL;
 
      for (int i = 0; i < rows; i++) {
           matrix->data[i] = (double*)malloc(cols * sizeof(double));
-          mem_err(matrix->data[i], 141);
+          if (matrix->data[i] == NULL) return NULL;
      }
 
      return matrix;
@@ -210,13 +210,13 @@ Matrix* mult_matrix(Matrix* a, Matrix* b) {
 }
 
 Vector* create_vector(size_t len) {
-     if (!len) value_err(NULL);
+     if (!len) return NULL;
      Vector* vector = (Vector*)malloc(sizeof(Vector));
-     mem_err(vector, 275);
+     if (vector == NULL) return NULL;
 
      vector->len = len;
      vector->data = (double*)malloc(vector->len * sizeof(double));
-     mem_err(vector->data, 279);
+     if (vector->data == NULL) return NULL;
 
      return vector;
 }
