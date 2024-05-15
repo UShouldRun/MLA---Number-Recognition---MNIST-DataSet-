@@ -1,18 +1,4 @@
-#include <stdlib.h>
-#include <assert.h>
-#include "nla.h"
-
-#define MAX_PARENTS 100
-#define MAX_CHILDREN 100
-
-typedef struct {
-    long id;
-    long parents[MAX_PARENTS];
-    long children[MAX_CHILDREN];
-    long visits;
-    long reward;
-    Vector* state;
-} Node;
+#include "../include/node.h"
 
 Node* create_node(long id, long reward, Vector* state) {
     Node* node = (Node*)malloc(sizeof(Node));

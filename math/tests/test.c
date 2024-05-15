@@ -1,11 +1,5 @@
-// This test file isn't complete. Some tests show some bugs, but I still didn't check them to see if those were in the tests or in the matrix.c file functions.
-// Even though I still have work to do on these unit tests, most of the tests give positive feedback.
-
-#include "matrix.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/nla.h"
 #include <time.h>
-#include <assert.h>
 
 #define EPSILON_TEST 10e-9
 #define TESTS 10000
