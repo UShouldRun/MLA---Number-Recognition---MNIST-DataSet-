@@ -45,9 +45,10 @@ double cost_partial_var(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK
     return - LEARNING_FACTOR * step/GUESS_STACK;
 }
 
-void gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]) {
+int gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]) {
     ID* id = malloc(sizeof(ID));
-    assert(id == NULL);
+    if (id == NULL) return ENOMEM;
+
     for (int k = EDGES - 1; k > -1; k--)
         for (long i = 0; i < weights[k]->rows; i++) {
             id->flag = 0; id->layer = k; id->i = i;
@@ -59,15 +60,61 @@ void gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK],
             biases[k]->data[i] += cost_partial_var(expected, guess, id, weights, biases, nodes);
         }
     free(id);
+
+    return 0;
 }
 
-void network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
+int network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]) {
+    if (nodes == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 68 : in function void network_guess() : null pointer (nodes) passed as input\n");
+        return EINVAL;
+    }
+    for (long i = 0; i < NODES; i++)
+        if (nodes[i] == NULL) {
+            fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 73 : in function void network_guess() : null pointer (nodes[%ld]) passed as input\n", i);
+            return EINVAL;
+        }
+
+    if (edges == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 78 : in function void network_guess() : null pointer (edges) passed as input\n");
+        return EINVAL;
+    }
+    for (long i = 0; i < EDGES; i++)
+        if (edges[i] == NULL) {
+            fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 83 : in function void network_guess() : null pointer (edges[%ld]) passed as input\n", i);
+            return EINVAL;
+        }
+
+    if (biases == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 88 : in function void network_guess() : null pointer (biases) passed as input\n");
+        return EINVAL;
+    }
+    for (long i = 0; i < EDGES; i++)
+        if (biases[i] == NULL) {
+            fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 93 : in function void network_guess() : null pointer (biases[%ld]) passed as input\n", i);
+            return EINVAL;
+        }
+
     Vector* raw_layer1 = matrix_vector_mul(edges[0], nodes[0]->state);
+    if (raw_layer1 == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 99 : in function void network_guess() : null pointer (rawlayer1) returned\n");
+        return EINVALRET;
+    };
     for (long i = 0; i < raw_layer1->len; i++) nodes[1]->state->data[i] = sigmoid(raw_layer1->data[i] + biases[0]->data[i]);
 
     Vector* raw_layer2 = matrix_vector_mul(edges[1], nodes[1]->state);
+    if (raw_layer2 == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 106 : in function void network_guess() : null pointer (rawlayer2) returned\n");
+        return EINVALRET;
+    }
     for (long i = 0; i < raw_layer2->len; i++) nodes[2]->state->data[i] = sigmoid(raw_layer2->data[i] + biases[1]->data[i]);
 
     Vector* raw_output = matrix_vector_mul(edges[2], nodes[2]->state);
+    if (raw_output == NULL) {
+        fprintf(stderr, "\nRuntime error : mla/src/nn_functions.c : 113 : in function void network_guess() : null pointer (rawlayer3) returned\n");
+        return EINVALRET;
+    }
     for (long i = 0; i < raw_output->len; i++) nodes[3]->state->data[i] = sigmoid(raw_output->data[i] + biases[2]->data[i]);
+
+    return 0;
 }

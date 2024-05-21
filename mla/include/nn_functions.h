@@ -5,7 +5,6 @@
 #include "../../math/include/nla.h"
 
 #define EXIT_SUCCESS 0
-#define MALLOC_FAIL 1
 
 #define SAMPLES 70000
 #define TEST_SAMPLES SAMPLES * 1/7
@@ -38,7 +37,7 @@ double impulse_partial_bias(ID* id, Matrix* weights[EDGES], Vector* biases[EDGES
 double impulse_partial_var(int x, ID* id, Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]);
 double cost_partial_var(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], ID* id, Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]);
 
-void gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]);
-void network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]);
+int gradient_descent(Vector* expected[GUESS_STACK], Vector* guess[GUESS_STACK], Matrix* weights[EDGES], Vector* biases[EDGES], Node* nodes[GUESS_STACK][NODES]);
+int network_guess(Node* nodes[NODES], Matrix* edges[EDGES], Vector* biases[EDGES]);
 
 #endif

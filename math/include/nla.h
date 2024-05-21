@@ -5,10 +5,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define ENOMEM -12
+#define EINVAL -22
+#define EINVALRET -32
 #define EPSILON 10e-9
 
 void mem_err(void *ptr, int line);
-void value_err(void *ptr);
+void value_err(void *ptr, int line);
 
 typedef struct {
 	size_t rows, cols;

@@ -4,42 +4,47 @@
 
 void mem_err(void *ptr, int line) {
      if (ptr == NULL) {
-          printf("Memory allocation failed: line %d;", line);
-          exit(EXIT_FAILURE);
+          fprintf(stderr, "Runtime error : math/src/nla.c : %d : memory allocation failed\n", line);
+          exit(ENOMEM);
      }
 }
 
-void value_err(void *ptr) {
+void value_err(void *ptr, int line) {
      if (ptr == NULL) {
-          printf("Value error\n");
-          exit(EXIT_FAILURE);
+          fprintf(stderr, "Runtime error : math/src/nla.c : %d : value error\n", line);
+          exit(EINVAL);
      }
 }
 
 void define_matrix(Matrix* matrix, double entries[], size_t len) {
-     if (len != matrix->rows * matrix->cols) value_err(NULL);
+     if (matrix == NULL) return;
+     if (len != matrix->rows * matrix->cols) value_err(NULL, 21);
      for (int i = 0; i < matrix->rows; i++)
           for (int j = 0; j < matrix->cols; j++)
                matrix->data[i][j] = entries[i*matrix->cols + j];
 }
 
 void define_vector(Vector* vector, double entries[], size_t len) {
-     if (vector->len != len) value_err(NULL);
+     if (vector == NULL) return;
+     if (vector->len != len) value_err(NULL, 29);
      for (int i = 0; i < vector->len; i++) vector->data[i] = entries[i];
 }
 
 void free_matrix(Matrix* matrix) {
+     if (matrix == NULL) return;
      for (int i = 0; i < matrix->rows; i++) free(matrix->data[i]);
      free(matrix->data);
      free(matrix);
 }
 
 void free_vector(Vector* vector) {
+     if (vector == NULL) return;
      free(vector->data);
      free(vector);
 }
 
 void print_matrix(Matrix* matrix, int precision) {
+     if (matrix == NULL) return;
      for (int i = 0; i < matrix->rows; i++) {
           printf("( ");
           for (int j = 0; j < matrix->cols; j++) {
@@ -50,7 +55,8 @@ void print_matrix(Matrix* matrix, int precision) {
 }
 
 void swap_rows(Matrix* matrix, int a, int b) {
-     if (a < 0 || b < 0 || a >= matrix->rows || b >= matrix->rows) value_err(NULL);
+     if (matrix == NULL) return;
+     if (a < 0 || b < 0 || a >= matrix->rows || b >= matrix->rows) value_err(NULL, 59);
      for (int j = 0; j < matrix->cols; j++) {
           double temp = matrix->data[a][j];
           matrix->data[a][j] = matrix->data[b][j];
@@ -58,7 +64,8 @@ void swap_rows(Matrix* matrix, int a, int b) {
      }
 }
 void swap_cols(Matrix* matrix, int a, int b) {
-     if (a < 0 || b < 0 || a >= matrix->cols || b >= matrix->cols) value_err(NULL);
+     if (matrix == NULL) return;
+     if (a < 0 || b < 0 || a >= matrix->cols || b >= matrix->cols) value_err(NULL, 68);
      for (int i = 0; i < matrix->rows; i++) { 
           double temp = matrix->data[i][a];
           matrix->data[i][a] = matrix->data[i][b];
@@ -67,18 +74,19 @@ void swap_cols(Matrix* matrix, int a, int b) {
 }
 
 Matrix* create_matrix(size_t rows, size_t cols) { 
+     if (rows == 0 || cols == 0) value_err(NULL, 77);
      Matrix* matrix = (Matrix*)malloc(sizeof(Matrix));
-     if (matrix == NULL) return NULL;
+     if (matrix == NULL) mem_err(NULL, 79);
 
      matrix->rows = rows;
      matrix->cols = cols;
 
      matrix->data = (double**)malloc(rows * sizeof(double*));
-     if (matrix->data == NULL) return NULL;
+     if (matrix->data == NULL) mem_err(NULL, 85);
 
      for (int i = 0; i < rows; i++) {
           matrix->data[i] = (double*)malloc(cols * sizeof(double));
-          if (matrix->data[i] == NULL) return NULL;
+          if (matrix->data[i] == NULL) mem_err(NULL, 89);
      }
 
      return matrix;
@@ -99,12 +107,14 @@ Matrix* id_matrix(size_t n) {
 }
 
 Matrix* vector_to_matrix(Vector* vector) {
+     if (vector == NULL) return NULL;
      Matrix* vector_mat = null_matrix(vector->len,1);
      define_matrix(vector_mat, vector->data, vector->len);
      return vector_mat;
 }
 
 Matrix* copy_matrix(Matrix* matrix) {
+     if (matrix == NULL) return NULL;
      Matrix* copy = create_matrix(matrix->rows, matrix->cols);
      for (int i = 0; i < matrix->rows; i++)
           for (int j = 0; j < matrix->cols; j++)
@@ -113,6 +123,7 @@ Matrix* copy_matrix(Matrix* matrix) {
 }
 
 Matrix* symmetric_matrix(Matrix* matrix) {
+     if (matrix == NULL) return NULL;
      Matrix* symetric = create_matrix(matrix->rows, matrix->cols);
      for (int i = 0; i < symetric->rows; i++)
           for (int j = 0; j < symetric->cols; j++)
@@ -121,6 +132,7 @@ Matrix* symmetric_matrix(Matrix* matrix) {
 }
 
 Matrix* transpose_matrix(Matrix* matrix) {
+     if (matrix == NULL) return NULL;
      Matrix* transpose = create_matrix(matrix->cols, matrix->rows);
      for (int i = 0; i < matrix->rows; i++)
           for (int j = 0; j < matrix->cols; j++)
@@ -129,6 +141,7 @@ Matrix* transpose_matrix(Matrix* matrix) {
 }
 
 Matrix* inverse_matrix(Matrix* matrix) {
+     if (matrix == NULL) return NULL;
      if (!is_square_matrix(matrix)) return NULL;
      if (!determinant_matrix(matrix)) return NULL;
      if (is_id_matrix(matrix, EPSILON)) return id_matrix(matrix->rows);
@@ -139,13 +152,7 @@ Matrix* inverse_matrix(Matrix* matrix) {
      }
 
      Matrix* copy = copy_matrix(matrix);
-     if (copy == NULL) return NULL;
-
      Matrix* id = id_matrix(matrix->rows);
-     if (id == NULL) {
-          free_matrix(copy);
-          return NULL;
-     }
 
      for (int j = 0; j < copy->cols && !is_id_matrix(copy, EPSILON); j++) {
           double a_jj = copy->data[j][j];
@@ -165,12 +172,11 @@ Matrix* inverse_matrix(Matrix* matrix) {
                swap_rows(id, i, j);
           }
 
-          if (a_jj != 1) {
+          if (a_jj != 1)
                 for (int k = 0; k < copy->cols; k++) {
                     copy->data[j][k] /= a_jj;
                     id->data[j][k] /= a_jj;
                }
-          }
 
           for (int i = 0; i < copy->rows; i++) {
                double a_ij = copy->data[i][j];
@@ -186,6 +192,7 @@ Matrix* inverse_matrix(Matrix* matrix) {
 }
 
 Matrix* add_matrix(Matrix* a, Matrix* b) {
+     if (a == NULL || b == NULL) return NULL;
      if (!(a->rows == b->rows && a->cols == b->cols)) return NULL;
      Matrix* c = create_matrix(a->rows,a->cols);
      for (int i = 0; i < c->rows; i++)
@@ -194,9 +201,13 @@ Matrix* add_matrix(Matrix* a, Matrix* b) {
      return c;
 }
 
-Matrix* sub_matrix(Matrix* a, Matrix* b) { return add_matrix(a, symmetric_matrix(b)); }
+Matrix* sub_matrix(Matrix* a, Matrix* b) {
+    if (a == NULL || b == NULL) return NULL;
+    return add_matrix(a, symmetric_matrix(b));
+}
 
 Matrix* mult_matrix(Matrix* a, Matrix* b) {
+     if (a == NULL || b == NULL) return NULL;
      if (a->cols - b->rows) return NULL;
      if (is_null_matrix(a, EPSILON) || is_null_matrix(b, EPSILON)) return null_matrix(a->rows,b->cols);
      if (is_id_matrix(a, EPSILON)) return copy_matrix(b);
@@ -212,11 +223,11 @@ Matrix* mult_matrix(Matrix* a, Matrix* b) {
 Vector* create_vector(size_t len) {
      if (!len) return NULL;
      Vector* vector = (Vector*)malloc(sizeof(Vector));
-     if (vector == NULL) return NULL;
+     if (vector == NULL) mem_err(NULL, 226);
 
      vector->len = len;
      vector->data = (double*)malloc(vector->len * sizeof(double));
-     if (vector->data == NULL) return NULL;
+     if (vector->data == NULL) mem_err(NULL, 230);
 
      return vector;
 }
@@ -228,30 +239,34 @@ Vector* null_vector(size_t len) {
 }
 
 Vector* copy_vector(Vector* vector) {
-    Vector* copy = create_vector(vector->len);
-    for (int i = 0; i < vector->len; i++) copy->data[i] = vector->data[i];
-    return copy;
+     if (vector == NULL) return NULL;
+     Vector* copy = create_vector(vector->len);
+     for (int i = 0; i < vector->len; i++) copy->data[i] = vector->data[i];
+     return copy;
 }
 
 Vector* matrix_to_vector(Matrix* matrix) {
-    if (matrix->cols != 1) value_err(NULL);
-    Vector* vector = null_vector(matrix->rows);
-    for (int i = 0; i < matrix->rows; i++) vector->data[i] = matrix->data[i][0];
-    return vector;
+     if (matrix == NULL) return NULL;
+     if (matrix->cols != 1) value_err(NULL, 250);
+     Vector* vector = null_vector(matrix->rows);
+     for (int i = 0; i < matrix->rows; i++) vector->data[i] = matrix->data[i][0];
+     return vector;
 }
 
 Vector* matrix_vector_mul(Matrix* matrix, Vector* vector) {
-    if (matrix->cols != vector->len) value_err(NULL);
-    Matrix* vec_mat = vector_to_matrix(vector);
-    Matrix* result = mult_matrix(matrix, vec_mat);
-    Vector* result_vector = matrix_to_vector(result);
-    free_matrix(vec_mat);
-    free_matrix(result);
-    return result_vector;
+     if (matrix == NULL || vector == NULL) return NULL;
+     if (matrix->cols != vector->len) value_err(NULL, 258);
+     Matrix* vec_mat = vector_to_matrix(vector);
+     Matrix* result = mult_matrix(matrix, vec_mat);
+     Vector* result_vector = matrix_to_vector(result);
+     free_matrix(vec_mat);
+     free_matrix(result);
+     return result_vector;
 }
 
 Vector* cross_product_3d(Vector* v, Vector* u) {
-    assert(v->len != 3);
+    if (v == NULL || u == NULL) return NULL;
+    if (v->len != 3 || u->len != 3) value_err(NULL, 269);
     Vector* w = create_vector(v->len);
 
     for (int j = 0; j < 3; j++) {
@@ -270,10 +285,14 @@ Vector* cross_product_3d(Vector* v, Vector* u) {
     return w;
 }
 
-int is_square_matrix(Matrix* matrix) { return matrix->rows == matrix->cols; }
+int is_square_matrix(Matrix* matrix) {
+    if (matrix == NULL) value_err(NULL, 289);
+    return matrix->rows == matrix->cols;
+}
 
 double determinant_matrix(Matrix* matrix) {
-    if (!is_square_matrix(matrix)) value_err(NULL);
+    if (matrix == NULL) value_err(NULL, 294);
+    if (!is_square_matrix(matrix)) value_err(NULL, 295);
     if (matrix->rows == 1) return matrix->data[0][0];
     if (has_null_row(matrix, EPSILON) || has_null_col(matrix, EPSILON)) return 0;
     if (is_id_matrix(matrix, EPSILON)) return 1;
@@ -301,6 +320,7 @@ double determinant_matrix(Matrix* matrix) {
 }
 
 int is_null_matrix(Matrix* matrix, double epsilon) {
+     if (matrix == NULL) value_err(NULL, 323);
      Matrix* null_mat = null_matrix(matrix->rows,matrix->cols);
      int test = equal_matrix(matrix, null_mat, epsilon);
      free(null_mat);
@@ -308,6 +328,7 @@ int is_null_matrix(Matrix* matrix, double epsilon) {
 }
 
 int is_id_matrix(Matrix* matrix, double epsilon) { 
+     if (matrix == NULL) value_err(NULL, 331);
      if (matrix->rows != matrix->cols) return 0;
      Matrix* id = id_matrix(matrix->rows);
      int test = equal_matrix(matrix, id, epsilon);
@@ -316,6 +337,7 @@ int is_id_matrix(Matrix* matrix, double epsilon) {
 }
 
 int has_null_row(Matrix* matrix, double epsilon) {
+     if (matrix == NULL) value_err(NULL, 340);
      for (int i = 0; i < matrix->rows; i++) {
           unsigned count = 0;
           for (int j = 0; j < matrix->cols; j++)
@@ -326,6 +348,7 @@ int has_null_row(Matrix* matrix, double epsilon) {
 }
 
 int has_null_col(Matrix* matrix, double epsilon) {
+     if (matrix == NULL) value_err(NULL, 351);
      for (int j = 0; j < matrix->cols; j++) {
           unsigned count = 0;
           for (int i = 0; i < matrix->rows; i++)
@@ -336,6 +359,7 @@ int has_null_col(Matrix* matrix, double epsilon) {
 }
 
 int equal_matrix(Matrix* a, Matrix* b, double epsilon) {
+     if (a == NULL || b == NULL) value_err(NULL, 362);
      if (a->rows != b->rows || a->cols != b->cols) return 0;
      for (int i = 0; i < a->rows; i++)
           for (int j = 0; j < a->cols; j++)
@@ -385,7 +409,8 @@ double sqrt_d(double number) {
 }
 
 double dot_product_vector(Vector* v, Vector* u) {
-    assert(v->len != u->len);
+    if (v == NULL || u == NULL) value_err(NULL, 412);
+    if (v->len != u->len) value_err(NULL, 413);
     double dot_product = 0;
     for (int i = 0; i < v->len; i++) dot_product += v->data[i] * u->data[i];
     return dot_product;

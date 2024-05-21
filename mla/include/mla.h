@@ -5,7 +5,7 @@
 #include "dataset_handling.h"
 #include <time.h>
 
-void update_progress_bar(int progress);
-void create_and_train_mla(const char* data_mla, Vector* input_pixels[TRAINING_SAMPLES], Vector* labels[TRAINING_SAMPLES]);
+void update_progress_bar(long i, double cost);
+void create_and_train_mla(LogFile* logFile, const char* data_mla, Vector* input_pixels[TRAINING_SAMPLES], Vector* labels[TRAINING_SAMPLES]);
 
 #endif

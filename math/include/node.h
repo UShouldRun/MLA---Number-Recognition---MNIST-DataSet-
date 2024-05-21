@@ -2,7 +2,6 @@
 #define NODE_H
 
 #include <stdlib.h>
-#include <assert.h>
 #include "nla.h"
 
 #define MAX_PARENTS 100
@@ -18,6 +17,10 @@ typedef struct {
 } Node;
 
 Node* create_node(long id, long reward, Vector* state);
+Node* copy_node(Node* node);
+
+void node_mem_err(void *ptr, int line);
+void node_value_err(void *ptr, int line);
 
 void free_node(Node* node);
 void set_parents(Node* node, long parents[], size_t length);

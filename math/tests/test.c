@@ -65,7 +65,7 @@ int main() {
 
 int test_definition(Matrix* matrix, double entries[], size_t len) {
     if (matrix->rows * matrix->cols != len) {
-        value_err(NULL); 
+        printf("Runtime error : math/tests/test.c : 67 : value error");
         return 0;
     }
 
