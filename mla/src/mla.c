@@ -21,7 +21,17 @@ void displayEdge(LogFile* file, void* object) {
     fprintf(file->file, "Data:\n");
     for (size_t i = 0; i < edge->rows; i++) {
         fprintf(file->file, (i == 0 || i == edge->rows - 1) ? "(" : "|");
+        if (edge->rows > 16 && i == 8) {
+            fprintf(file->file, " ... ");
+            i += edge->rows - 16;
+            continue;
+        }
         for (size_t j = 0; j < edge->cols; j++) {
+            if (edge->cols > 16 && j == 8) {
+                fprintf(file->file, " ... ");
+                j += edge->cols - 16;
+                continue;
+            }
             fprintf(file->file, " %.2lf ", edge->data[i][j]);
             if (j == edge->cols - 1) fprintf(file->file, (i == 0 || i == edge->rows - 1) ? ")\n" : "|\n");
         }
@@ -136,6 +146,7 @@ void create_and_train_mla(LogFile* logFile, const char* data_mla, Vector* input_
         for (long j = 0; j < GUESS_STACK; j++) {
             writeTaskStatus("loading input pixels...");
             nodes[0]->state = input_pixels[i * TRAINING_SAMPLES + j];
+            writeObjectData(logFile, logEntry, nodes[0], displayNode);
             writeTaskStatus("loaded input pixels -> cleaning network");
             for (long k = 1; k < NODES; k++)
                 for (int l = 0; l < nodes[k]->state->len; l++)
@@ -144,7 +155,7 @@ void create_and_train_mla(LogFile* logFile, const char* data_mla, Vector* input_
 
             int errorCode;
             if ((errorCode = network_guess(nodes, edges, biases)) != 0) {
-                logError(logFile, &logEntry->task, errorCode, "error in nla.c functions or network_guess() internal structure", "mla/src/nn_functions.c : in function int network_guess() : 138");
+                logError(logFile, &logEntry->task, errorCode, "error in nla.c functions or network_guess() internal structure", "mla/src/nn_functions.c : in function int network_guess() : 157");
                 setLogLevel(logEntry, "FATAL");
                 strncpy(logEntry->message, logEntry->task.lastError.errorMessage, sizeof(logEntry->message) - 1);
                 writeLogEntry(logFile, logEntry);
@@ -165,7 +176,7 @@ void create_and_train_mla(LogFile* logFile, const char* data_mla, Vector* input_
         update_progress_bar(i, cost(expected, guess));
         int errorCode;
         if ((errorCode = gradient_descent(expected, guess, edges, biases, stored_network)) != 0) {
-            logError(logFile, &logEntry->task, errorCode, "error in nn_functions.c functions or gradient_descent() internal structure", "mla/src/nn_functions.c : in function int gradient_descent() : 159");
+            logError(logFile, &logEntry->task, errorCode, "error in nn_functions.c functions or gradient_descent() internal structure", "mla/src/nn_functions.c : in function int gradient_descent() : 178");
             setLogLevel(logEntry, "FATAL");
             strncpy(logEntry->message, logEntry->task.lastError.errorMessage, sizeof(logEntry->message) - 1);
             writeLogEntry(logFile, logEntry);

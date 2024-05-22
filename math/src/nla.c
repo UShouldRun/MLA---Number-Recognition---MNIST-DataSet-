@@ -290,35 +290,6 @@ int is_square_matrix(Matrix* matrix) {
     return matrix->rows == matrix->cols;
 }
 
-double determinant_matrix(Matrix* matrix) {
-    if (matrix == NULL) value_err(NULL, 294);
-    if (!is_square_matrix(matrix)) value_err(NULL, 295);
-    if (matrix->rows == 1) return matrix->data[0][0];
-    if (has_null_row(matrix, EPSILON) || has_null_col(matrix, EPSILON)) return 0;
-    if (is_id_matrix(matrix, EPSILON)) return 1;
-
-    double apply_la_place(Matrix* mat) {
-        if (mat->rows == 2) return mat->data[0][0] * mat->data[1][1] - mat->data[1][0] * mat->data[0][1];
-
-        double det = 0;
-        for (int j = 0; j < mat->cols; j++) {
-            Matrix* sub_mat = null_matrix(mat->rows - 1, mat->cols - 1);
-            for (int q = 0; q < mat->cols; q++)
-                for (int p = 1; p < mat->rows; p++)
-                    if (q != j) sub_mat->data[p - 1][q - (q > j ? 1 : 0)] = mat->data[p][q];
-            int sign = j % 2 ? -1 : 1;
-            det += sign * mat->data[0][j] * apply_la_place(sub_mat);
-            free(sub_mat);
-        }
-        return det;
-    }
-
-    Matrix* determinant = copy_matrix(matrix);
-    double det = apply_la_place(determinant);
-    free_matrix(determinant);
-    return det;
-}
-
 int is_null_matrix(Matrix* matrix, double epsilon) {
      if (matrix == NULL) value_err(NULL, 323);
      Matrix* null_mat = null_matrix(matrix->rows,matrix->cols);
@@ -367,45 +338,33 @@ int equal_matrix(Matrix* a, Matrix* b, double epsilon) {
      return 1;
 }
 
-long factorial(long n) {
-    long fact = 1;
-    for (long i = 1; i < n; i++) fact *= i;
-    return fact;
-}
+double determinant_matrix(Matrix* matrix) {
+    if (matrix == NULL) value_err(NULL, 294);
+    if (!is_square_matrix(matrix)) value_err(NULL, 295);
+    if (matrix->rows == 1) return matrix->data[0][0];
+    if (has_null_row(matrix, EPSILON) || has_null_col(matrix, EPSILON)) return 0;
+    if (is_id_matrix(matrix, EPSILON)) return 1;
 
-double pow_int(double x, long n) {
-    if (x == 1) return 1;
-    if (x == 0) return 0;
-    if (x == -1) return n % 2 ? -1 : 1;
-    double result = 1;
-    double r = n < 0 ? 1/x : x;
-    n = n < 0 ? -n : n;
-    for (long i = 0; i < n; i++) result *= r;
-    return result;
-}
+    double apply_la_place(Matrix* mat) {
+        if (mat->rows == 2) return mat->data[0][0] * mat->data[1][1] - mat->data[1][0] * mat->data[0][1];
 
-double exp(double x) {
-    long n = 0;
-    double sum = 0, prev;
-    do {
-    prev = sum;
-    sum += pow_int(x, n) / factorial(n);
-    n++;
-    } while(abs_d(sum - prev) > EPSILON);
-    return sum;
-}
-
-double sigmoid(double x) { return 1/(1 + exp(-x)); }
-
-double abs_d(double number) { return number < 0 ? -number : number; } 
-
-double sqrt_d(double number) {
-    double x0 = number/2;
-    double newtons_method(double x_n, int iteration) {
-        if (iteration == 50) return x_n;
-        return newtons_method(x_n/2 - x0/(2 * x_n), ++iteration);
+        double det = 0;
+        for (int j = 0; j < mat->cols; j++) {
+            Matrix* sub_mat = null_matrix(mat->rows - 1, mat->cols - 1);
+            for (int q = 0; q < mat->cols; q++)
+                for (int p = 1; p < mat->rows; p++)
+                    if (q != j) sub_mat->data[p - 1][q - (q > j ? 1 : 0)] = mat->data[p][q];
+            int sign = j % 2 ? -1 : 1;
+            det += sign * mat->data[0][j] * apply_la_place(sub_mat);
+            free(sub_mat);
+        }
+        return det;
     }
-    return newtons_method(x0, 0);
+
+    Matrix* determinant = copy_matrix(matrix);
+    double det = apply_la_place(determinant);
+    free_matrix(determinant);
+    return det;
 }
 
 double dot_product_vector(Vector* v, Vector* u) {

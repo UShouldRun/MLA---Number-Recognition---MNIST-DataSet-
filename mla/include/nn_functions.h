@@ -21,8 +21,6 @@
 #define NODE_LEVEL_2 16
 #define NODE_LEVEL_3 10
 
-#define MAX_ENTRY 100
-
 typedef struct {
     short unsigned flag;
     long layer;

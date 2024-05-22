@@ -3,12 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include "funcs.h" 
 
 #define ENOMEM -12
 #define EINVAL -22
 #define EINVALRET -32
-#define EPSILON 10e-9
 
 void mem_err(void *ptr, int line);
 void value_err(void *ptr, int line);
@@ -57,12 +56,6 @@ int has_null_row(Matrix* matrix, double epsilon);
 int has_null_col(Matrix* matrix, double epsilon);
 int equal_matrix(Matrix* a, Matrix* b, double epsilon);
 
-long factorial(long n);
-
-double pow_int(double x, long n);
-double exp(double x);
-double sigmoid(double x);
-double abs_d(double number);
 double determinant_matrix(Matrix* matrix);
 double dot_product_vector(Vector* v, Vector* u);
 double norm_vector(Vector* vector);
